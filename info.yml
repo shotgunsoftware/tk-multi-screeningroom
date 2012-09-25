@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2012 Shotgun Software, Inc
+# ----------------------------------------------------
+#
+# Metadata defining the behaviour and requirements for this app
+
+
+# expected fields in the configuration file for this app
+configuration:
+    rv_path_windows:       
+        type: str
+        default_value: "C:\\Program Files\\RV\\RV64.exe"
+        description: The path to the Rv executable on Windows.  
+    rv_path_linux:       
+        type: str
+        default_value: "rv"  
+        description: The path to the Rv executable on Linux.  
+    rv_path_mac:       
+        type: str
+        default_value: "/Applications/RV64.app"  
+        description: The path to the Rv executable on Macosx.                  
+
+# the Shotgun fields that this app needs in order to operate correctly
+requires_shotgun_fields:
+
