@@ -39,7 +39,7 @@ class NukeLaunchRevolver(Application):
         return app_path
         
     def _start_revolver(self):
-        import tk_multi_revolver
+        tk_multi_revolver = self.import_module("tk_multi_revolver")
         
         # figure out the context for revolver
         # first try to get a version
