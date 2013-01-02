@@ -8,7 +8,6 @@ An app that launches revolver from nuke
 
 import sys
 import os
-import platform
 
 from tank.platform import Application
 
@@ -24,15 +23,15 @@ class NukeLaunchRevolver(Application):
         Returns the RV binary to run
         """
         # get the setting        
-        system = platform.system()
+        system = sys.platform
         try:
-            app_setting = {"Linux": "rv_path_linux", "Darwin": "rv_path_mac", "Windows": "rv_path_windows"}[system]
+            app_setting = {"linux2": "rv_path_linux", "darwin": "rv_path_mac", "win32": "rv_path_windows"}[system]
             app_path = self.get_setting(app_setting)
             if not app_path: raise KeyError()
         except KeyError:
             raise Exception("Platform '%s' is not supported." % system) 
         
-        if system == "Darwin":
+        if system == "darwin":
             # append Contents/MacOS/RV64 to the app bundle path
             app_path = os.path.join(app_path, "Contents/MacOS/RV64") 
         
