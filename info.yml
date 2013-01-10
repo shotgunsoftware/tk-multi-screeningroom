@@ -20,8 +20,8 @@ configuration:
         default_value: "/Applications/RV64.app"  
         description: The path to the Rv executable on Macosx.                  
 
-# the engines that this app can operate in:
-supported_engines: [tk-nuke, tk-maya, tk-motionbuilder]
+# this multi app runs in all engines
+supported_engines: 
 
 # the Shotgun fields that this app needs in order to operate correctly
 requires_shotgun_fields:
