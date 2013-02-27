@@ -2,7 +2,7 @@
 Copyright (c) 2012 Shotgun Software, Inc
 ----------------------------------------------------
 
-An app that launches revolver from nuke
+An app that launches Screening Room
 
 """
 
@@ -11,11 +11,11 @@ import os
 
 from tank.platform import Application
 
-class NukeLaunchRevolver(Application):
+class NukeLaunchScreeningRoom(Application):
     
     def init_app(self):
-        self.engine.register_command("Jump into Revolver", 
-                                     self._start_revolver,
+        self.engine.register_command("Jump to Screening Room", 
+                                     self._start_screeningroom,
                                      {"type": "context_menu"})
         
     def _get_rv_binary(self):
@@ -37,10 +37,10 @@ class NukeLaunchRevolver(Application):
         
         return app_path
         
-    def _start_revolver(self):
-        tk_multi_revolver = self.import_module("tk_multi_revolver")
+    def _start_screeningroom(self):
+        tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
         
-        # figure out the context for revolver
+        # figure out the context for Screening Room
         # first try to get a version
         # if that fails try to get the current entity
         rv_context = None
@@ -62,7 +62,7 @@ class NukeLaunchRevolver(Application):
         if rv_context is None:
             # fall back on entity
             # try to extract a version (because versions are launched in a really nice way
-            # in revolver, while entities are not so nice...)
+            # in Screening Room, while entities are not so nice...)
             self.log_debug("Looking for versions connected to %s..." % self.context.entity)
             filters = [["entity", "is", self.context.entity]]
             order   = [{"field_name": "created_at", "direction": "desc"}]
@@ -80,13 +80,13 @@ class NukeLaunchRevolver(Application):
                 rv_context = self.context.entity
             
         
-        self.log_debug("Launching revolver for context %s" % rv_context)
+        self.log_debug("Launching Screening Room for context %s" % rv_context)
         
         try:
-            tk_multi_revolver.revolver.launch_timeline(base_url=self.shotgun.base_url,
+            tk_multi_screeningroom.screeningroom.launch_timeline(base_url=self.shotgun.base_url,
                                                     context=rv_context,
                                                     path_to_rv=self._get_rv_binary())
         except Exception, e:
-            self.log_error("Could not launch revolver - check your configuration! "
+            self.log_error("Could not launch Screening Room - check your configuration! "
                                   "Error reported: %s" % e)
     

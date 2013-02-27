@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ---------------------------------------------------------------------------------------------
-# Copyright (c) 2009-2011, Shotgun Software Inc
+# Copyright (c) 2009-2013, Shotgun Software Inc
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-__version__ = '0.2'
+__version__ = '0.4'
 
 from optparse import OptionParser
 import webbrowser
@@ -35,7 +35,7 @@ import urllib
 import sys
 import subprocess
 
-class RevolverError(Exception):
+class ScreeningRoomError(Exception):
     pass
 
 
@@ -62,6 +62,7 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
         webbrowser.open(url)
         return
 
+    print("Running %s" % ' '.join([path_to_rv] + args));
     subprocess.Popen([path_to_rv] + args)
 
 def _serialize_mu_args(args):
@@ -78,7 +79,7 @@ def _serialize_mu_args(args):
 
 def launch_timeline(base_url, context, path_to_rv=None):
     """
-    Launch the Revolver timeline to the given context, on the given base_url.
+    Launch the Screening Room timeline to the given context, on the given base_url.
     
     :param base_url: The base url for Shotgun, i.e. https://mysg.shotgunstudio.com
     :type base_url: `str`
@@ -103,7 +104,7 @@ def launch_timeline(base_url, context, path_to_rv=None):
     """
     
     if not base_url:
-        raise RevolverError('A base url must be specified to launch the Revolver timeline')
+        raise ScreeningRoomError('A base url must be specified to launch the Screening Room timeline')
     
     # Generate the url for the timeline
     base_url = base_url.rstrip('/')
@@ -118,17 +119,17 @@ def launch_timeline(base_url, context, path_to_rv=None):
             else:
                 valid_entity_types = ['Version', 'Asset', 'Sequence', 'Shot', 'Playlist', 'Page']
                 if context['type'] not in valid_entity_types:
-                    raise RevolverError('Unsupported entity type %s for RV timeline. Must be '
-                                        'one of %s' % (context['type'], ', '.join(valid_entity_types)))
+                    raise ScreeningRoomError('Unsupported entity type %s for RV timeline. Must be '
+                                             'one of %s' % (context['type'], ', '.join(valid_entity_types)))
 
                 args.extend([('entity_type', context['type']), ('entity_id', context['id'])])
         elif 'asset_type' in context and 'project_id' in context:
             args.extend([('asset_type', context['asset_type']),
                          ('project_id', context['project_id'])])
         else:
-            raise RevolverError('Invalid context supplied for the Revolver timeline. Context '
-                                'must contain either entity "type" and "id" entries, or '
-                                '"asset_type" and "project_id" entries.')
+            raise ScreeningRoomError('Invalid context supplied for the Screening Room timeline. Context '
+                                     'must contain either entity "type" and "id" entries, or '
+                                     '"asset_type" and "project_id" entries.')
 
     # Convert the args to a Mu string representation
     ser_args = _serialize_mu_args(args)
@@ -139,7 +140,7 @@ def launch_timeline(base_url, context, path_to_rv=None):
 
 def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None, path_to_rv=None):
     """
-    Launch the Revolver submit tool on the given base_url, using the given context to determine
+    Launch the Screening Room submit tool on the given base_url, using the given context to determine
     the task and entity link for the created Version, if possible. If the context is not
     a Task, then an entity and pipeline step id must be provided and a best guess will be made
     based on this information to determine the Task. An optional quicktime output path can be
@@ -155,7 +156,11 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
             * `type`: Should be "Task"
             * `id`: The task id.
 
-        * A Shotgun entity and pipeline step id. From this, Revolver will make a best guess as to the task that should be associated with the Version:
+        * A Shotgun entity.
+            * `type`: An entity type, e.g. "Shot", "Asset"
+            * `id`: The associated id of the entity
+
+        * A Shotgun entity and pipeline step id. From this, Screening Room will make a best guess as to the task that should be associated with the Version:
             * `type`: An entity type, e.g. "Shot", "Asset"
             * `id`: The associated id of the entity
             * `step_id`: The id of the pipeline step associated with this submission.
@@ -171,10 +176,10 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
     """
 
     if not base_url:
-        raise RevolverError('A base url must be specified to launch the submit tool')
+        raise ScreeningRoomError('A base url must be specified to launch the submit tool')
     
     if not source_image_seq:
-        raise RevolverError('A source image sequence must be specified to launch the submit tool')
+        raise ScreeningRoomError('A source image sequence must be specified to launch the submit tool')
     
     # Generate the url for the submit tool
     base_url = base_url.rstrip('/')
@@ -192,8 +197,8 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
                 if 'step_id' in context:
                     args.append(('step_id', context['step_id']))
         else:
-            raise RevolverError('Invalid context supplied for submit tool. Context must contain '
-                                '"type" and "id" entries.')
+            raise ScreeningRoomError('Invalid context supplied for submit tool. Context must contain '
+                                     '"type" and "id" entries.')
         
     # If an output path for the Quicktime was specified, we need to encode it so it can be passed
     # via the url
@@ -298,8 +303,7 @@ def main():
                 context['step_id'] = options.step_id
 
         try:
-            launch_submit_tool(options.base_url, context, options.source_image_sequence, 
-                               options.quicktime_output_path. options.path_to_rv)
+            launch_submit_tool(options.base_url, context, options.source_image_sequence, options.quicktime_output_path, options.path_to_rv)
         except Exception, e:
             print 'ERROR: %s' % e
             return 1

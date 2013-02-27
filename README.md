@@ -1,4 +1,4 @@
-tk-multi-revolver
-=================
+tk-multi-screeningroom
+======================
 
-Launch revolver directly from an application
+Launch Screening Room directly from an application
