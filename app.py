@@ -16,7 +16,7 @@ class NukeLaunchScreeningRoom(Application):
     def init_app(self):
         self.engine.register_command("Jump to Screening Room", 
                                      self._start_screeningroom,
-                                     {"type": "context_menu"})
+                                     {"type": "context_menu", "short_name": "screening_room"})
         
     def _get_rv_binary(self):
         """
