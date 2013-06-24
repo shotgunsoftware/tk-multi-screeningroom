@@ -39,7 +39,7 @@ class ScreeningRoomError(Exception):
     pass
 
 
-def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
+def _launch_rv(base_url, cmd, source=None, path_to_rv=None, tank_app=None):
     # Launch RV with the given list of args.
     args = ['-flags', 'ModeManagerPreload=shotgun_review_app']
 
@@ -53,41 +53,41 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
 
     if source:
         args.append(source)
-    
+
     # If no path to RV was provided, us the rvlink protocol to launch RV
     if not path_to_rv:
-        # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink 
+        # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink
         # custom protocol
         url = '%s/rvlink/baked/%s' % (base_url, (' ' + ' '.join(args)).encode('hex'))
         webbrowser.open(url)
         return
 
-    print("Running %s" % ' '.join([path_to_rv] + args));
-    subprocess.Popen([path_to_rv] + args)
+    # call the tank_app to execute the hook which will actually launch rv.
+    tank_app.execute_hook("hook_launch_rv", rv_path=path_to_rv, rv_args=args)
 
 def _serialize_mu_args(args):
     # Convert the list of key-value pairs to the equivalent Mu representation
- 
+
     if not args:
         return ''
 
     joined_args = []
     for (key, value) in args:
         joined_args.append('("%s", "%s")' % (key, value))
-        
-    return '[(string, string)] {%s}' % ', '.join(joined_args) 
 
-def launch_timeline(base_url, context, path_to_rv=None):
+    return '[(string, string)] {%s}' % ', '.join(joined_args)
+
+def launch_timeline(base_url, context, path_to_rv=None, tank_app=None):
     """
     Launch the Screening Room timeline to the given context, on the given base_url.
-    
+
     :param base_url: The base url for Shotgun, i.e. https://mysg.shotgunstudio.com
     :type base_url: `str`
     :param context: Optional. A dictionary containing one of the following sets of key-value
         configurations:
 
         * A Shotgun entity
-            * `type`: Must be one of the following entity types: 'Version', 'Asset', 
+            * `type`: Must be one of the following entity types: 'Version', 'Asset',
                       'Sequence', 'Shot', 'Playlist' or 'Page'. If using 'Page' the
                       page type *must* be a Version page.
             * `id`: The corresponding id for the entity
@@ -97,22 +97,22 @@ def launch_timeline(base_url, context, path_to_rv=None):
                             'Environment', 'Prop', etc.
             * `project_id`: A Shotgun project id.
 
-    :type context: `dict` 
+    :type context: `dict`
     :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will be started
        via a web browser using the rvlink protocol
     :type path_to_rv: `str`
     """
-    
+
     if not base_url:
         raise ScreeningRoomError('A base url must be specified to launch the Screening Room timeline')
-    
+
     # Generate the url for the timeline
     base_url = base_url.rstrip('/')
     url = '%s/page/review_app' % base_url
 
     args = []
     if context:
-        # Generate the list of URL parameters from the given context dictionary 
+        # Generate the list of URL parameters from the given context dictionary
         if 'type' in context and 'id' in context:
             if context['type'] == 'Version':
                 args.append(('version_id', context['id']))
@@ -136,7 +136,7 @@ def launch_timeline(base_url, context, path_to_rv=None):
     cmd = 'shotgun_review_app.theMode().launchTimeline(%s);' % ser_args
 
     # Open RV with this configuration
-    return _launch_rv(base_url, cmd, None, path_to_rv) 
+    return _launch_rv(base_url, cmd, None, path_to_rv, tank_app)
 
 def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None, path_to_rv=None):
     """
@@ -144,9 +144,9 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
     the task and entity link for the created Version, if possible. If the context is not
     a Task, then an entity and pipeline step id must be provided and a best guess will be made
     based on this information to determine the Task. An optional quicktime output path can be
-    provided. If not provided, the quicktime will be generated to the same path as the source 
+    provided. If not provided, the quicktime will be generated to the same path as the source
     images.
-    
+
     :param base_url: The base url for Shotgun, i.e. https://mysg.shotgunstudio.com
     :type base_url: `str`
     :param context: Optional. A dictionary containing one of the following sets of key-value
@@ -164,8 +164,8 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
             * `type`: An entity type, e.g. "Shot", "Asset"
             * `id`: The associated id of the entity
             * `step_id`: The id of the pipeline step associated with this submission.
-        
-    :type context: `dict` 
+
+    :type context: `dict`
     :param source_image_seq: The image sequence to be submitted
     :type source_image_seq: `str`
     :param qt_output_path: The path to which the quicktime for this submission should be generated.
@@ -177,14 +177,14 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
 
     if not base_url:
         raise ScreeningRoomError('A base url must be specified to launch the submit tool')
-    
+
     if not source_image_seq:
         raise ScreeningRoomError('A source image sequence must be specified to launch the submit tool')
-    
+
     # Generate the url for the submit tool
     base_url = base_url.rstrip('/')
     url = '%s/page/review_app_submit' % base_url
-    
+
     # Generate the list of URL parameters from the given context dictionary
     args = []
     if context:
@@ -199,39 +199,39 @@ def launch_submit_tool(base_url, context, source_image_seq, qt_output_path=None,
         else:
             raise ScreeningRoomError('Invalid context supplied for submit tool. Context must contain '
                                      '"type" and "id" entries.')
-        
+
     # If an output path for the Quicktime was specified, we need to encode it so it can be passed
     # via the url
     if qt_output_path:
         args.append(('qt_output_path', urllib.quote_plus(qt_output_path)))
-        
+
     # Convert the args to a Mu string representation
     ser_args = _serialize_mu_args(args)
     cmd = 'shotgun_review_app.theMode().launchSubmitTool(%s);' % ser_args
 
     # Open RV with this configuration
-    return _launch_rv(base_url, cmd, source_image_seq, path_to_rv)     
-    
+    return _launch_rv(base_url, cmd, source_image_seq, path_to_rv)
+
 
 def main():
-    
+
     parser = OptionParser()
-    
+
     parser.add_option('-u', '--base-url',
                       help='Required. The Shotgun base url to be used. Of the form: '
                            'https://mysg.shotgunstudio.com')
-    
-    parser.add_option('-m', '--mode', 
+
+    parser.add_option('-m', '--mode',
                       help='Optional. The mode in which to launch the review app. One of: "timeline", '
                            'or "submit". Defaults to "timeline".')
-    
-    parser.add_option('-v', '--version-id', 
+
+    parser.add_option('-v', '--version-id',
                       help='Optional. A version id, in "timeline" mode.')
-    
+
     parser.add_option('-y', '--entity-type',
                       help='Optional. An entity type, in "submit" mode if no Task id is provided, or in '
                            '"timeline" mode if no Version id has been provided ')
-    
+
     parser.add_option('-e', '--entity-id',
                       help='Optional. An entity id, in "submit" mode if no Task id is provided, or in '
                            '"timeline" mode if no Version id has been provided.')
@@ -242,16 +242,16 @@ def main():
 
     parser.add_option('-p', '--project-id',
                       help='Optional. Required if using --asset-type.')
-    
+
     parser.add_option('-t', '--task-id',
                       help='Optional. A task id, in "submit" mode.')
-    
+
     parser.add_option('-s', '--step-id',
                       help='Optional. The id of a pipeline step, in "submit" mode if no Task id is provided.')
-    
+
     parser.add_option('-i', '--source-image-sequence',
                       help='Required in "submit" mode. The source image sequence path.')
-    
+
     parser.add_option('-o', '--quicktime-output-path',
                       help='Optional. An output path for the generated quicktime in "submit" mode. '
                            'If omitted, the quicktime will be generated in the same directory as '
@@ -260,13 +260,13 @@ def main():
     parser.add_option('-r', '--path-to-rv',
                       help='Optional. The path to the RV executable. If omitted, RV will be started via a '
                            'web browser using the rvlink protocol.')
-    
+
     (options, args) = parser.parse_args()
-    
+
     if not options.mode:
         print 'INFO: No mode provided. Defaulting to "timeline" mode'
         options.mode = 'timeline'
-    
+
     if options.mode not in ['timeline', 'submit']:
         print 'ERROR: Invalid review app mode: %s' % options.mode
         return 1
@@ -276,7 +276,7 @@ def main():
         return 1
 
     context = None
-    
+
     if options.mode == 'timeline':
         # Assemble a context dictionary from the command line options that were passed in
         if options.version_id:
@@ -285,7 +285,7 @@ def main():
             context = {'type': options.entity_type, 'id': options.entity_id}
         elif options.asset_type and options.project_id:
             context = {'asset_type': options.asset_type, 'project_id': options.project_id}
-            
+
         try:
             launch_timeline(options.base_url, context, options.path_to_rv)
         except Exception, e:
@@ -307,9 +307,9 @@ def main():
         except Exception, e:
             print 'ERROR: %s' % e
             return 1
-        
+
     return 0
 
 if __name__ == '__main__':
     sys.exit(main())
-    
+
