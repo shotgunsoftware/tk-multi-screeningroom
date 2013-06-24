@@ -7,26 +7,32 @@
 
 # expected fields in the configuration file for this app
 configuration:
-    rv_path_windows:       
+    rv_path_windows:
         type: str
         default_value: "C:\\Program Files\\RV\\RV64.exe"
-        description: The path to the Rv executable on Windows.  
-    rv_path_linux:       
+        description: The path to the Rv executable on Windows.
+    rv_path_linux:
         type: str
-        default_value: "rv"  
-        description: The path to the Rv executable on Linux.  
-    rv_path_mac:       
+        default_value: "rv"
+        description: The path to the Rv executable on Linux.
+    rv_path_mac:
         type: str
-        default_value: "/Applications/RV64.app"  
-        description: The path to the Rv executable on Macosx.                  
+        default_value: "/Applications/RV64.app"
+        description: The path to the Rv executable on Macosx.
+    hook_launch_rv:
+        type: hook
+        default_value: screeningroom_launch_rv
+        description: "This hook is called when the actual call to launch rv
+                      occurs.  The configured path and rv arguements are
+                      provided as arguements"
 
 # this multi app runs in all engines
-supported_engines: 
+supported_engines:
 
 # the Shotgun fields that this app needs in order to operate correctly
 requires_shotgun_fields:
 
-# More verbose description of this item 
+# More verbose description of this item
 display_name: "Screening Room Integration"
 description: "Screening Room integration right inside your application."
 
