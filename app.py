@@ -75,7 +75,7 @@ class MultiLaunchScreeningRoom(Application):
                 # got a version
                 rv_context = version
 
-        if rv_context is None:
+        if rv_context is None and self.context.entity:
             # fall back on entity
             # try to extract a version (because versions are launched in a really nice way
             # in Screening Room, while entities are not so nice...)
