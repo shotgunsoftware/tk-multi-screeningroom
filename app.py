@@ -17,6 +17,7 @@ import sys
 import os
 
 from tank.platform import Application
+from tank import TankError
 
 class MultiLaunchScreeningRoom(Application):
     
@@ -43,7 +44,7 @@ class MultiLaunchScreeningRoom(Application):
             app_path = self.get_setting(app_setting)
             if not app_path: raise KeyError()
         except KeyError:
-            raise Exception("Platform '%s' is not supported." % system) 
+            raise TankError("Platform '%s' is not supported." % system) 
         
         if system == "darwin":
             # append Contents/MacOS/RV64 to the app bundle path
@@ -100,7 +101,7 @@ class MultiLaunchScreeningRoom(Application):
             rv_context = self.context.project
             
         if rv_context is None:
-            self.log_error("Not able to figure out a current context to launch screening room for!")
+            raise TankError("Not able to figure out a current context to launch screening room for!")
         
         self.log_debug("Closest match to current context is %s" % rv_context)
         
@@ -140,5 +141,5 @@ class MultiLaunchScreeningRoom(Application):
                                                     context=entity,
                                                     path_to_rv=self._get_rv_binary())
         except Exception, e:
-            self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
+            raise TankError("Could not launch RV Screening Room. Error reported: %s" % e)
     
