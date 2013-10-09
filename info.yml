@@ -25,6 +25,15 @@ configuration:
         type: str
         default_value: "/Applications/RV64.app"  
         description: The path to the Rv executable on Macosx.                  
+    enable_rv_mode:
+        type: bool
+        default: true
+        description: Create a menu item that allows a user to jump the Screening Room RV Player
+    enable_web_mode:
+        type: bool
+        default: true
+        description: Create a menu item that allows a user to jump the Screening Room Web Player
+
 
 # this multi app runs in all engines
 supported_engines: 

@@ -18,13 +18,20 @@ import os
 
 from tank.platform import Application
 
-class NukeLaunchScreeningRoom(Application):
+class MultiLaunchScreeningRoom(Application):
     
     def init_app(self):
-        self.engine.register_command("Jump to Screening Room", 
-                                     self._start_screeningroom,
-                                     {"type": "context_menu", "short_name": "screening_room"})
         
+        if self.get_setting("enable_rv_mode"):        
+            self.engine.register_command("Jump to Screening Room in RV", 
+                                         self._start_screeningroom_rv,
+                                         {"type": "context_menu", "short_name": "screening_room_rv"})
+        
+        if self.get_setting("enable_web_mode"):        
+            self.engine.register_command("Jump to Screening Room Web Player", 
+                                         self._start_screeningroom_web,
+                                         {"type": "context_menu", "short_name": "screening_room_web"})
+
     def _get_rv_binary(self):
         """
         Returns the RV binary to run
@@ -44,8 +51,10 @@ class NukeLaunchScreeningRoom(Application):
         
         return app_path
         
-    def _start_screeningroom(self):
-        tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
+    def _get_entity(self):
+        """
+        Returns the most relevant playback entity (as a sg std dict) for the current context
+        """
         
         # figure out the context for Screening Room
         # first try to get a version
@@ -85,15 +94,51 @@ class NukeLaunchScreeningRoom(Application):
             else:
                 # no versions, fall back onto just the entity
                 rv_context = self.context.entity
-            
         
-        self.log_debug("Launching Screening Room for context %s" % rv_context)
+        if rv_context is None:
+            # fall back on project
+            rv_context = self.context.project
+            
+        if rv_context is None:
+            self.log_error("Not able to figure out a current context to launch screening room for!")
+        
+        self.log_debug("Closest match to current context is %s" % rv_context)
+        
+        return rv_context
+        
+        
+    def _start_screeningroom_web(self):
+        """
+        Launches the screening room web player
+        """
+        from tank.platform.qt import QtGui, QtCore
+        
+        entity = self._get_entity()
+
+        # url format is 
+        # https://playbook.shotgunstudio.com/page/screening_room?entity_type=Version&entity_id=222
+        url = "%s/page/screening_room?entity_type=%s&entity_id=%s" % (self.shotgun.base_url, 
+                                                                      entity.get("type"),
+                                                                      entity.get("id"))
+        
+        self.log_debug("Opening url %s" % url)
+        
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
+        
+        
+    def _start_screeningroom_rv(self):
+        """
+        Launches the screening room rv player
+        """
+        
+        entity = self._get_entity()
+        
+        tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
         
         try:
             tk_multi_screeningroom.screeningroom.launch_timeline(base_url=self.shotgun.base_url,
-                                                    context=rv_context,
+                                                    context=entity,
                                                     path_to_rv=self._get_rv_binary())
         except Exception, e:
-            self.log_error("Could not launch Screening Room - check your configuration! "
-                                  "Error reported: %s" % e)
+            self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
     
