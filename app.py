@@ -48,7 +48,16 @@ class MultiLaunchScreeningRoom(Application):
         
         if system == "darwin":
             # append Contents/MacOS/RV64 to the app bundle path
-            app_path = os.path.join(app_path, "Contents/MacOS/RV64") 
+            # if that doesn't work, try with just RV, which is used by 32 bit RV
+            # if that doesn't work, show an error message
+            orig_app_path = app_path
+            app_path = os.path.join(orig_app_path, "Contents/MacOS/RV64")
+            if not os.path.exists(app_path):
+                # try 32 bit RV (which has an RV executable rather than RV64
+                app_path = os.path.join(orig_app_path, "Contents/MacOS/RV")
+            if not os.path.exists(app_path):
+                # did not find rv64 nor 32
+                raise Exception("The RV path you have configured ('%s') does not exist!" % orig_app_path)            
         
         return app_path
         
@@ -141,5 +150,5 @@ class MultiLaunchScreeningRoom(Application):
                                                     context=entity,
                                                     path_to_rv=self._get_rv_binary())
         except Exception, e:
-            raise TankError("Could not launch RV Screening Room. Error reported: %s" % e)
+            raise self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
     
