@@ -111,13 +111,14 @@ def launch_timeline(base_url, context, path_to_rv=None):
     url = '%s/page/review_app' % base_url
 
     args = []
+
     if context:
         # Generate the list of URL parameters from the given context dictionary 
         if 'type' in context and 'id' in context:
             if context['type'] == 'Version':
                 args.append(('version_id', context['id']))
             else:
-                valid_entity_types = ['Version', 'Asset', 'Sequence', 'Shot', 'Playlist', 'Page']
+                valid_entity_types = ['Version', 'Asset', 'Sequence', 'Shot', 'Playlist', 'Page', 'Project']
                 if context['type'] not in valid_entity_types:
                     raise ScreeningRoomError('Unsupported entity type %s for RV timeline. Must be '
                                              'one of %s' % (context['type'], ', '.join(valid_entity_types)))
