@@ -33,6 +33,12 @@ configuration:
         type: bool
         default_value: true
         description: Toggles the display of a menu item that allows a user to jump the Screening Room Web Player.
+    init_hook:
+        type: hook
+        default_value: "{self}/init.py"
+        description: This hook contains methods that a user can override in order
+                     control how the environment is initialized before screening
+                     room is launched. 
 
 
 # this multi app runs in all engines

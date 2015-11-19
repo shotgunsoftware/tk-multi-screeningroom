@@ -140,15 +140,15 @@ class MultiLaunchScreeningRoom(Application):
         """
         Launches the screening room rv player
         """
-        
         entity = self._get_entity()
-        
         tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
         
         try:
+            rv_path = self._get_rv_binary()
+            self.execute_hook_method("init_hook", "before_rv_launch", path=rv_path)
             tk_multi_screeningroom.screeningroom.launch_timeline(base_url=self.shotgun.base_url,
                                                     context=entity,
-                                                    path_to_rv=self._get_rv_binary())
+                                                    path_to_rv=rv_path)
         except Exception, e:
-            raise self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
+            self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
     
