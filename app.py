@@ -33,6 +33,13 @@ class MultiLaunchScreeningRoom(Application):
                                          self._start_screeningroom_web,
                                          {"type": "context_menu", "short_name": "screening_room_web"})
 
+    @property
+    def context_change_allowed(self):
+        """
+        Specifies that context changes are allowed.
+        """
+        return True
+
     def _get_rv_binary(self):
         """
         Returns the RV binary to run
