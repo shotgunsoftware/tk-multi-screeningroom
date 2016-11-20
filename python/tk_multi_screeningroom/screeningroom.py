@@ -49,7 +49,7 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     else:
         # We also need to set the server if not going via the rvlink
         cmd = 'shotgun_review_app.theMode().setServer("%s"); %s' % (base_url, cmd)
-        args.extend(['-eval', cmd])
+        args.extend(['-eval', '\'%s\'' % cmd])
 
     if source:
         args.append(source)
@@ -62,8 +62,9 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
         webbrowser.open(url)
         return
 
-    print("Running %s" % ' '.join([path_to_rv] + args));
-    subprocess.Popen([path_to_rv] + args)
+    cmdLine = " ".join([path_to_rv] + args)
+    print("Running %s" % cmdLine)
+    subprocess.Popen(cmdLine, shell=True))
 
 def _serialize_mu_args(args):
     # Convert the list of key-value pairs to the equivalent Mu representation
