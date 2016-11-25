@@ -62,7 +62,7 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
         webbrowser.open(url)
         return
 
-    cmdLine = " ".join([path_to_rv] + args)
+    cmdLine = " ".join(['"%s"' % path_to_rv] + args)
     print("Running %s" % cmdLine)
     subprocess.Popen(cmdLine, shell=True)
 
