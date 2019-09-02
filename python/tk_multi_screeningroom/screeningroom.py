@@ -40,29 +40,32 @@ class ScreeningRoomError(Exception):
 
 
 def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
-    # Launch RV with the given list of args.
-    args = ['-flags', 'ModeManagerPreload=shotgun_review_app']
 
-    if not path_to_rv:
-        # The command needs to be enclosed in quotes when using the rvlink protocol
-        args.extend(['-eval', '\'%s\'' % cmd])
-    else:
-        # We also need to set the server if not going via the rvlink
+    if path_to_rv:
+        # We need to set the server if not going via the SG site rvlink
         cmd = 'shotgun_review_app.theMode().setServer("%s"); %s' % (base_url, cmd)
-        args.extend(['-eval', '\'%s\'' % cmd])
+
+    # Launch RV with the given list of args.
+    # The command needs to be enclosed in quotes when using the rvlink protocol
+    args = ['-flags', 'ModeManagerPreload=shotgun_review_app', '-eval', '\'%s\'' % cmd]
 
     if source:
         args.append(source)
-    
-    # If no path to RV was provided, us the rvlink protocol to launch RV
+
+    # We should encode the args so that no special characters exist in the command
+    encoded_args = (' ' + ' '.join(args)).encode('hex')
+
+    # If no path to RV was provided, us the SG site rvlink protocol to launch RV
     if not path_to_rv:
-        # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink 
+        # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink
         # custom protocol
-        url = '%s/rvlink/baked/%s' % (base_url, (' ' + ' '.join(args)).encode('hex'))
+        url = '%s/rvlink/baked/%s' % (base_url, encoded_args)
         webbrowser.open(url)
         return
+    else:
+        url = 'rvlink://baked/%s' % (encoded_args)
 
-    cmdLine = " ".join(['"%s"' % path_to_rv] + args)
+    cmdLine = " ".join(['"%s"' % path_to_rv, url])
     print("Running %s" % cmdLine)
     subprocess.Popen(cmdLine, shell=True)
 
