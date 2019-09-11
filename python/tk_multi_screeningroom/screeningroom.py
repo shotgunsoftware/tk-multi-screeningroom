@@ -61,13 +61,11 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
         # custom protocol
         url = '%s/rvlink/baked/%s' % (base_url, encoded_args)
         webbrowser.open(url)
-        return
     else:
         url = 'rvlink://baked/%s' % (encoded_args)
-
-    cmdLine = " ".join(['"%s"' % path_to_rv, url])
-    print("Running %s" % cmdLine)
-    subprocess.Popen(cmdLine, shell=True)
+        cmdLine = " ".join(['"%s"' % path_to_rv, url])
+        print("Running %s" % cmdLine)
+        subprocess.Popen(cmdLine, shell=True)
 
 def _serialize_mu_args(args):
     # Convert the list of key-value pairs to the equivalent Mu representation
