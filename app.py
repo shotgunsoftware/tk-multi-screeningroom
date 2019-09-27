@@ -20,18 +20,34 @@ from tank.platform import Application
 from tank import TankError
 
 class MultiLaunchScreeningRoom(Application):
-    
+
     def init_app(self):
-        
-        if self.get_setting("enable_rv_mode"):        
-            self.engine.register_command("Jump to Screening Room in RV", 
+
+        if self.get_setting("enable_rv_mode"):
+
+            parameters = {
+                "short_name": "screening_room_rv",
+                "title": "Jump to Screening Room in RV",
+                "type": "context_menu",
+                "description": "Jump to Screening Room in RV"
+            }
+
+            self.engine.register_command(parameters['short_name'],
                                          self._start_screeningroom_rv,
-                                         {"type": "context_menu", "short_name": "screening_room_rv"})
-        
-        if self.get_setting("enable_web_mode"):        
-            self.engine.register_command("Jump to Screening Room Web Player", 
+                                         parameters)
+
+        if self.get_setting("enable_web_mode"):
+
+            parameters = {
+                "short_name": "screening_room_web",
+                "title": "Jump to Screening Room Web Player",
+                "type": "context_menu",
+                "description": "Jump to Screening Room Web Player"
+            }
+
+            self.engine.register_command(parameters['short_name'],
                                          self._start_screeningroom_web,
-                                         {"type": "context_menu", "short_name": "screening_room_web"})
+                                         parameters)
 
     @property
     def context_change_allowed(self):
