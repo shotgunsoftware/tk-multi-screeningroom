@@ -267,15 +267,15 @@ def main():
     (options, args) = parser.parse_args()
     
     if not options.mode:
-        print 'INFO: No mode provided. Defaulting to "timeline" mode'
+        print('INFO: No mode provided. Defaulting to "timeline" mode')
         options.mode = 'timeline'
     
     if options.mode not in ['timeline', 'submit']:
-        print 'ERROR: Invalid review app mode: %s' % options.mode
+        print('ERROR: Invalid review app mode: %s' % options.mode)
         return 1
 
     if not options.base_url:
-        print 'ERROR: A Shotgun base url must be specified'
+        print('ERROR: A Shotgun base url must be specified')
         return 1
 
     context = None
@@ -291,8 +291,8 @@ def main():
             
         try:
             launch_timeline(options.base_url, context, options.path_to_rv)
-        except Exception, e:
-            print 'ERROR: %s' % e
+        except Exception as e:
+            print('ERROR: %s' % e)
             return 1
 
     elif options.mode == 'submit':
@@ -307,8 +307,8 @@ def main():
 
         try:
             launch_submit_tool(options.base_url, context, options.source_image_sequence, options.quicktime_output_path, options.path_to_rv)
-        except Exception, e:
-            print 'ERROR: %s' % e
+        except Exception as e:
+            print('ERROR: %s' % e)
             return 1
         
     return 0

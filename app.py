@@ -156,6 +156,6 @@ class MultiLaunchScreeningRoom(Application):
             tk_multi_screeningroom.screeningroom.launch_timeline(base_url=self.shotgun.base_url,
                                                     context=entity,
                                                     path_to_rv=rv_path)
-        except Exception, e:
+        except Exception as e:
             self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
     
