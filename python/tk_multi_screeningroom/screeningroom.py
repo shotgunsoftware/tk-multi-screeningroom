@@ -115,7 +115,6 @@ def launch_timeline(base_url, context, path_to_rv=None):
 
     # Generate the url for the timeline
     base_url = base_url.rstrip("/")
-    url = "%s/page/review_app" % base_url
 
     args = []
 
@@ -216,7 +215,6 @@ def launch_submit_tool(
 
     # Generate the url for the submit tool
     base_url = base_url.rstrip("/")
-    url = "%s/page/review_app_submit" % base_url
 
     # Generate the list of URL parameters from the given context dictionary
     args = []
