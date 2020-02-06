@@ -16,8 +16,9 @@ An app that launches Screening Room
 import sys
 import os
 
-from tank.platform import Application
-from tank import TankError
+import sgtk
+from sgtk.platform import Application
+from sgtk import TankError
 
 
 class MultiLaunchScreeningRoom(Application):
@@ -51,11 +52,13 @@ class MultiLaunchScreeningRoom(Application):
         # get the setting
         system = sys.platform
         try:
-            app_setting = {
-                "linux2": "rv_path_linux",
-                "darwin": "rv_path_mac",
-                "win32": "rv_path_windows",
-            }[system]
+            app_setting = (
+                "rv_path_linux"
+                if sgtk.util.is_windows()
+                else "rv_path_mac"
+                if sgtk.util.is_macos()
+                else "rv_path_linux"
+            )
             app_path = self.get_setting(app_setting)
             if not app_path:
                 raise KeyError()
@@ -92,7 +95,7 @@ class MultiLaunchScreeningRoom(Application):
         task = self.context.task
         if task:
             # look for versions matching this task!
-            self.log_debug("Looking for versions connected to %s..." % task)
+            self.logger.debug("Looking for versions connected to %s..." % task)
             filters = [["sg_task", "is", task]]
             order = [{"field_name": "created_at", "direction": "desc"}]
             fields = ["id"]
@@ -107,7 +110,7 @@ class MultiLaunchScreeningRoom(Application):
             # fall back on entity
             # try to extract a version (because versions are launched in a really nice way
             # in Screening Room, while entities are not so nice...)
-            self.log_debug(
+            self.logger.debug(
                 "Looking for versions connected to %s..." % self.context.entity
             )
             filters = [["entity", "is", self.context.entity]]
@@ -133,7 +136,7 @@ class MultiLaunchScreeningRoom(Application):
                 "Not able to figure out a current context to launch screening room for!"
             )
 
-        self.log_debug("Closest match to current context is %s" % rv_context)
+        self.logger.debug("Closest match to current context is %s" % rv_context)
 
         return rv_context
 
@@ -141,7 +144,7 @@ class MultiLaunchScreeningRoom(Application):
         """
         Launches the screening room web player
         """
-        from tank.platform.qt import QtGui, QtCore
+        from sgtk.platform.qt import QtGui, QtCore
 
         entity = self._get_entity()
 
@@ -153,7 +156,7 @@ class MultiLaunchScreeningRoom(Application):
             entity.get("id"),
         )
 
-        self.log_debug("Opening url %s" % url)
+        self.logger.debug("Opening url %s" % url)
 
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
@@ -171,4 +174,6 @@ class MultiLaunchScreeningRoom(Application):
                 base_url=self.shotgun.base_url, context=entity, path_to_rv=rv_path
             )
         except Exception as e:
-            self.log_error("Could not launch RV Screening Room. Error reported: %s" % e)
+            self.logger.error(
+                "Could not launch RV Screening Room. Error reported: %s" % e
+            )

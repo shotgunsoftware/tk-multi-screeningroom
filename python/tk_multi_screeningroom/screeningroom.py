@@ -31,9 +31,12 @@ __version__ = "0.4"
 
 from optparse import OptionParser
 import webbrowser
-import urllib
 import sys
 import subprocess
+import codecs
+import time
+
+from tank_vendor import six
 
 
 class ScreeningRoomError(Exception):
@@ -53,20 +56,32 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     if source:
         args.append(source)
 
+    combined_args = " " + " ".join(args)
     # We should encode the args so that no special characters exist in the command
-    encoded_args = (" " + " ".join(args)).encode("hex")
+    # Encode the string into binary so that we can convert the args to a hex
+    binary_str = six.ensure_binary(combined_args)
+    # Encode the binary into a hex
+    encoded_args = codecs.encode(binary_str, "hex")
+    # Now convert the binary back into a string which contains the hex representing the args.
+    hex_encoded_args_string = six.ensure_str(encoded_args)
 
     # If no path to RV was provided, us the SG site rvlink protocol to launch RV
     if not path_to_rv:
         # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink
         # custom protocol
-        url = "%s/rvlink/baked/%s" % (base_url, encoded_args)
+        url = "%s/rvlink/baked/%s" % (base_url, hex_encoded_args_string)
         webbrowser.open(url)
     else:
-        url = "rvlink://baked/%s" % (encoded_args)
+        url = "rvlink://baked/%s" % (hex_encoded_args_string)
         cmdLine = " ".join(['"%s"' % path_to_rv, url])
         print("Running %s" % cmdLine)
         subprocess.Popen(cmdLine, shell=True)
+        # For some reason, on Python 3, it doesn't complete launching of the RV if python exits straight after.
+        # Adding a small sleep seems to allow it enough time to launch, although this is ugly.
+        # It was also found that launching Firefox or the Calculator app did work without the need for the sleep.
+        # So maybe it is something specific to RV?
+        # FIXME: We need to find a better fix than waiting and hoping that is long enough to allow RV to start launching.
+        time.sleep(0.5)
 
 
 def _serialize_mu_args(args):
@@ -238,7 +253,9 @@ def launch_submit_tool(
     # If an output path for the Quicktime was specified, we need to encode it so it can be passed
     # via the url
     if qt_output_path:
-        args.append(("qt_output_path", urllib.quote_plus(qt_output_path)))
+        args.append(
+            ("qt_output_path", six.moves.urllib.parse.quote_plus(qt_output_path))
+        )
 
     # Convert the args to a Mu string representation
     ser_args = _serialize_mu_args(args)
