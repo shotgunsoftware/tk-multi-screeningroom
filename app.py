@@ -50,7 +50,6 @@ class MultiLaunchScreeningRoom(Application):
         Returns the RV binary to run
         """
         # get the setting
-        system = sys.platform
         try:
             app_setting = (
                 "rv_path_linux"
@@ -63,9 +62,9 @@ class MultiLaunchScreeningRoom(Application):
             if not app_path:
                 raise KeyError()
         except KeyError:
-            raise TankError("Platform '%s' is not supported." % system)
+            raise TankError("Platform '%s' is not supported." % sys.platform)
 
-        if system == "darwin":
+        if sgtk.util.is_macos():
             # append Contents/MacOS/RV64 to the app bundle path
             # if that doesn't work, try with just RV, which is used by 32 bit RV
             # if that doesn't work, show an error message
@@ -174,6 +173,6 @@ class MultiLaunchScreeningRoom(Application):
                 base_url=self.shotgun.base_url, context=entity, path_to_rv=rv_path
             )
         except Exception as e:
-            self.logger.error(
+            self.logger.exception(
                 "Could not launch RV Screening Room. Error reported: %s" % e
             )
