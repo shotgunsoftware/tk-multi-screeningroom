@@ -124,7 +124,7 @@ def launch_timeline(base_url, context, path_to_rv=None):
             * `project_id`: A Shotgun project id.
 
     :type context: `dict`
-    :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will belog started
+    :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will be started
        via a web browser using the rvlink protocol
     :type path_to_rv: `str`
     """
