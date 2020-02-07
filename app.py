@@ -52,7 +52,7 @@ class MultiLaunchScreeningRoom(Application):
         # get the setting
         try:
             app_setting = (
-                "rv_path_linux"
+                "rv_path_windows"
                 if sgtk.util.is_windows()
                 else "rv_path_mac"
                 if sgtk.util.is_macos()

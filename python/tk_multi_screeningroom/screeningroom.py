@@ -36,6 +36,7 @@ import subprocess
 import codecs
 import time
 
+import sgtk
 from tank_vendor import six
 
 
@@ -44,6 +45,7 @@ class ScreeningRoomError(Exception):
 
 
 def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
+    app = sgtk.platform.current_bundle()
 
     if path_to_rv:
         # We need to set the server if not going via the SG site rvlink
@@ -70,18 +72,22 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
         # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink
         # custom protocol
         url = "%s/rvlink/baked/%s" % (base_url, hex_encoded_args_string)
+        app.logger.info("Opening URL: %s" % url)
         webbrowser.open(url)
     else:
         url = "rvlink://baked/%s" % (hex_encoded_args_string)
         cmdLine = " ".join(['"%s"' % path_to_rv, url])
-        print("Running %s" % cmdLine)
+
+        app.logger.info("Running %s" % cmdLine)
         subprocess.Popen(cmdLine, shell=True)
         # For some reason, on Python 3, it doesn't complete launching of the RV if python exits straight after.
         # Adding a small sleep seems to allow it enough time to launch, although this is ugly.
         # It was also found that launching Firefox or the Calculator app did work without the need for the sleep.
-        # So maybe it is something specific to RV?
+        # So it maybe something specific to RV.
+        # This will only likely happen in the shell engine, so only add the sleep in shell engine.
         # FIXME: We need to find a better fix than waiting and hoping that is long enough to allow RV to start launching.
-        time.sleep(0.5)
+        if app.engine.name == "tk-shell":
+            time.sleep(0.5)
 
 
 def _serialize_mu_args(args):
@@ -118,7 +124,7 @@ def launch_timeline(base_url, context, path_to_rv=None):
             * `project_id`: A Shotgun project id.
 
     :type context: `dict`
-    :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will be started
+    :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will belog started
        via a web browser using the rvlink protocol
     :type path_to_rv: `str`
     """
