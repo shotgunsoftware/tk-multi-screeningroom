@@ -25,10 +25,19 @@ class MultiLaunchScreeningRoom(Application):
     def init_app(self):
 
         if self.get_setting("enable_rv_mode"):
+            # We only support multiple selection for `Version`
+            # entities when run in the `tk-shotgun` engine.
+            supports_multiple_selection = (
+                True if self.context.entity["type"] == "Version" else False
+            )
             self.engine.register_command(
                 "Jump to Screening Room in RV",
                 self._start_screeningroom_rv,
-                {"type": "context_menu", "short_name": "screening_room_rv"},
+                {
+                    "type": "context_menu",
+                    "short_name": "screening_room_rv",
+                    "supports_multiple_selection": supports_multiple_selection,
+                },
             )
 
         if self.get_setting("enable_web_mode"):
@@ -159,11 +168,22 @@ class MultiLaunchScreeningRoom(Application):
 
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
-    def _start_screeningroom_rv(self):
+    def _start_screeningroom_rv(self, entity_type=None, entity_ids=None):
         """
         Launches the screening room rv player
+        The entity_type and entity_ids are passed if supports_multiple_selection is
+        enabled in the registered command, and that is only enabled if we are dealing
+        with Version entities in the tk-shotgun engine.
         """
-        entity = self._get_entity()
+
+        if entity_type == "Version" and entity_ids:
+            # if we have an entity_typ and entity_ids we are running in
+            # the tk-shotgun engine on a Version entity.
+            # RV can handle opening multiple versions so we pass through
+            # a Version ID list instead of the usual single entity
+            entity = {"version_ids": entity_ids}
+        else:
+            entity = self._get_entity()
         tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
 
         try:
