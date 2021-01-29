@@ -174,8 +174,8 @@ def launch_timeline(base_url, context, path_to_rv=None):
                 ]
             )
         elif "version_ids" in context and len(context["version_ids"]) > 0:
-            # Provide a list of version IDs for RRV to select and add to the timeline in screeningroom
-            # We must select one version ID to be the main selected on.
+            # Provide a list of version IDs for RV to select and add to the timeline in screeningroom
+            # We must select one version ID to be the main selected one.
             args.append(("version_id", context["version_ids"][0]))
             args.append(
                 ("version_ids", ",".join(str(x) for x in context["version_ids"]))

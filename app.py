@@ -177,10 +177,10 @@ class MultiLaunchScreeningRoom(Application):
         """
 
         if entity_type == "Version" and entity_ids:
-            # if we have an entity_typ and entity_ids we are running in
+            # if we have an entity_type and entity_ids we are running in
             # the tk-shotgun engine on a Version entity.
             # RV can handle opening multiple versions so we pass through
-            # a Version ID list instead of the usual single entity
+            # a Version ID list instead of the usual single entity.
             entity = {"version_ids": entity_ids}
         else:
             entity = self._get_entity()
