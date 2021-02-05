@@ -25,19 +25,26 @@ class MultiLaunchScreeningRoom(Application):
     def init_app(self):
 
         if self.get_setting("enable_rv_mode"):
+            command_settings = {
+                "type": "context_menu",
+                "short_name": "screening_room_rv",
+            }
             # We only support multiple selection for `Version`
             # entities when run in the `tk-shotgun` engine.
-            supports_multiple_selection = (
-                True if self.context.entity["type"] == "Version" else False
-            )
+            # The supports_multiple_selection setting holds two purposes
+            # Setting it to True will mean the engine allows the action
+            # to be run on multiple entities simultaneously from the browser.
+            # But even just defining the setting as false is enough
+            # for the engine to run the action command in a different way.
+            # Some engines don't support this old method, so we are only setting
+            # it if we want it to be True.
+            if self.context.entity["type"] == "Version":
+                command_settings["supports_multiple_selection"] = True
+
             self.engine.register_command(
                 "Jump to Screening Room in RV",
                 self._start_screeningroom_rv,
-                {
-                    "type": "context_menu",
-                    "short_name": "screening_room_rv",
-                    "supports_multiple_selection": supports_multiple_selection,
-                },
+                command_settings,
             )
 
         if self.get_setting("enable_web_mode"):
