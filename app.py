@@ -38,7 +38,7 @@ class MultiLaunchScreeningRoom(Application):
             # for the engine to run the action command in a different way.
             # Some engines don't support this old method, so we are only setting
             # it if we want it to be True.
-            if self.context.entity["type"] == "Version":
+            if self.context.entity and self.context.entity["type"] == "Version":
                 command_settings["supports_multiple_selection"] = True
 
             self.engine.register_command(
