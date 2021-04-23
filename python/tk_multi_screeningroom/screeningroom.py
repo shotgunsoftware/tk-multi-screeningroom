@@ -278,7 +278,7 @@ def main():
     parser.add_option(
         "-u",
         "--base-url",
-        help="Required. The Shotgun base url to be used. Of the form: "
+        help="Required. The SG base url to be used. Of the form: "
         "https://mysg.shotgunstudio.com",
     )
 
@@ -358,7 +358,7 @@ def main():
         return 1
 
     if not options.base_url:
-        print("ERROR: A Shotgun base url must be specified")
+        print("ERROR: A SG base url must be specified")
         return 1
 
     context = None
