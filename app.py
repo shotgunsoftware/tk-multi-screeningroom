@@ -25,10 +25,26 @@ class MultiLaunchScreeningRoom(Application):
     def init_app(self):
 
         if self.get_setting("enable_rv_mode"):
+            command_settings = {
+                "type": "context_menu",
+                "short_name": "screening_room_rv",
+            }
+            # We only support multiple selection for `Version`
+            # entities when run in the `tk-shotgun` engine.
+            # The supports_multiple_selection setting holds two purposes
+            # Setting it to True will mean the engine allows the action
+            # to be run on multiple entities simultaneously from the browser.
+            # But even just defining the setting as false is enough
+            # for the engine to run the action command in a different way.
+            # Some engines don't support this old method, so we are only setting
+            # it if we want it to be True.
+            if self.context.entity and self.context.entity["type"] == "Version":
+                command_settings["supports_multiple_selection"] = True
+
             self.engine.register_command(
                 "Jump to Screening Room in RV",
                 self._start_screeningroom_rv,
-                {"type": "context_menu", "short_name": "screening_room_rv"},
+                command_settings,
             )
 
         if self.get_setting("enable_web_mode"):
@@ -159,11 +175,22 @@ class MultiLaunchScreeningRoom(Application):
 
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
-    def _start_screeningroom_rv(self):
+    def _start_screeningroom_rv(self, entity_type=None, entity_ids=None):
         """
         Launches the screening room rv player
+        The entity_type and entity_ids are passed if supports_multiple_selection is
+        enabled in the registered command, and that is only enabled if we are dealing
+        with Version entities in the tk-shotgun engine.
         """
-        entity = self._get_entity()
+
+        if entity_type == "Version" and entity_ids:
+            # if we have an entity_type and entity_ids we are running in
+            # the tk-shotgun engine on a Version entity.
+            # RV can handle opening multiple versions so we pass through
+            # a Version ID list instead of the usual single entity.
+            entity = {"version_ids": entity_ids}
+        else:
+            entity = self._get_entity()
         tk_multi_screeningroom = self.import_module("tk_multi_screeningroom")
 
         try:

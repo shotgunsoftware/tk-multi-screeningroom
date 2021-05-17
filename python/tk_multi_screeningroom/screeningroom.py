@@ -123,6 +123,9 @@ def launch_timeline(base_url, context, path_to_rv=None):
                             'Environment', 'Prop', etc.
             * `project_id`: A Shotgun project id.
 
+        * A list of Version ids
+            * `version_ids`: a list containing Version ids.
+
     :type context: `dict`
     :param path_to_rv: Optional. Path to the RV executable. If omitted, RV will be started
        via a web browser using the rvlink protocol
@@ -170,11 +173,18 @@ def launch_timeline(base_url, context, path_to_rv=None):
                     ("project_id", context["project_id"]),
                 ]
             )
+        elif "version_ids" in context and len(context["version_ids"]) > 0:
+            # Provide a list of version IDs for RV to select and add to the timeline in screeningroom
+            # We must select one version ID to be the main selected one.
+            args.append(("version_id", context["version_ids"][0]))
+            args.append(
+                ("version_ids", ",".join(str(x) for x in context["version_ids"]))
+            )
         else:
             raise ScreeningRoomError(
                 "Invalid context supplied for the Screening Room timeline. Context "
-                'must contain either entity "type" and "id" entries, or '
-                '"asset_type" and "project_id" entries.'
+                'must contain either entity "type" and "id" entries, '
+                '"asset_type" and "project_id" entries, or a "version_ids" entry.'
             )
 
     # Convert the args to a Mu string representation
