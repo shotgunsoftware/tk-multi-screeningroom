@@ -48,7 +48,7 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     app = sgtk.platform.current_bundle()
 
     if path_to_rv:
-        # We need to set the server if not going via the SG site rvlink
+        # We need to set the server if not going via the PTR site rvlink
         cmd = 'shotgun_review_app.theMode().setServer("%s"); %s' % (base_url, cmd)
 
     # Launch RV with the given list of args.
@@ -67,7 +67,7 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     # Now convert the binary back into a string which contains the hex representing the args.
     hex_encoded_args_string = six.ensure_str(encoded_args)
 
-    # If no path to RV was provided, us the SG site rvlink protocol to launch RV
+    # If no path to RV was provided, us the PTR site rvlink protocol to launch RV
     if not path_to_rv:
         # Encode the RV args. We'll use shotgun to redirect to the RV app via the rvlink
         # custom protocol
@@ -288,7 +288,7 @@ def main():
     parser.add_option(
         "-u",
         "--base-url",
-        help="Required. The SG base url to be used. Of the form: "
+        help="Required. The PTR base url to be used. Of the form: "
         "https://mysg.shotgunstudio.com",
     )
 
@@ -368,7 +368,7 @@ def main():
         return 1
 
     if not options.base_url:
-        print("ERROR: A SG base url must be specified")
+        print("ERROR: A PTR base url must be specified")
         return 1
 
     context = None
