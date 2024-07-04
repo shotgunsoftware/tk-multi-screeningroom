@@ -37,7 +37,7 @@ import codecs
 import time
 
 import sgtk
-from tank_vendor import six
+from tank_vendor import sgutils
 
 
 class ScreeningRoomError(Exception):
@@ -61,11 +61,11 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     combined_args = " " + " ".join(args)
     # We should encode the args so that no special characters exist in the command
     # Encode the string into binary so that we can convert the args to a hex
-    binary_str = six.ensure_binary(combined_args)
+    binary_str = sgutils.ensure_binary(combined_args)
     # Encode the binary into a hex
     encoded_args = codecs.encode(binary_str, "hex")
     # Now convert the binary back into a string which contains the hex representing the args.
-    hex_encoded_args_string = six.ensure_str(encoded_args)
+    hex_encoded_args_string = sgutils.ensure_str(encoded_args)
 
     # If no path to RV was provided, us the PTR site rvlink protocol to launch RV
     if not path_to_rv:
