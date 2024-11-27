@@ -35,6 +35,7 @@ import sys
 import subprocess
 import codecs
 import time
+import urllib
 
 import sgtk
 
@@ -274,7 +275,7 @@ def launch_submit_tool(
     # via the url
     if qt_output_path:
         args.append(
-            ("qt_output_path", six.moves.urllib.parse.quote_plus(qt_output_path))
+            ("qt_output_path", urllib.parse.quote_plus(qt_output_path))
         )
 
     # Convert the args to a Mu string representation
