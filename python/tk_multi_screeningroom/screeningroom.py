@@ -274,9 +274,7 @@ def launch_submit_tool(
     # If an output path for the Quicktime was specified, we need to encode it so it can be passed
     # via the url
     if qt_output_path:
-        args.append(
-            ("qt_output_path", urllib.parse.quote_plus(qt_output_path))
-        )
+        args.append(("qt_output_path", urllib.parse.quote_plus(qt_output_path)))
 
     # Convert the args to a Mu string representation
     ser_args = _serialize_mu_args(args)
