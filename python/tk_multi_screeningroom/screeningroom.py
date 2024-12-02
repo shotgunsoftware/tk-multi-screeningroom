@@ -101,7 +101,7 @@ def _serialize_mu_args(args):
         return ""
 
     joined_args = []
-    for (key, value) in args:
+    for key, value in args:
         joined_args.append('("%s", "%s")' % (key, value))
 
     return "[(string, string)] {%s}" % ", ".join(joined_args)
@@ -286,7 +286,6 @@ def launch_submit_tool(
 
 
 def main():
-
     parser = OptionParser()
 
     parser.add_option(
