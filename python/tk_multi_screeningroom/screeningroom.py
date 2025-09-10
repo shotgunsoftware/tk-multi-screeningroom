@@ -39,11 +39,6 @@ import urllib
 
 import sgtk
 
-try:
-    from tank_vendor import sgutils
-except ImportError:
-    from tank_vendor import six as sgutils
-
 
 class ScreeningRoomError(Exception):
     pass
@@ -66,11 +61,11 @@ def _launch_rv(base_url, cmd, source=None, path_to_rv=None):
     combined_args = " " + " ".join(args)
     # We should encode the args so that no special characters exist in the command
     # Encode the string into binary so that we can convert the args to a hex
-    binary_str = sgutils.ensure_binary(combined_args)
+    binary_str = combined_args.encode("utf-8")
     # Encode the binary into a hex
     encoded_args = codecs.encode(binary_str, "hex")
     # Now convert the binary back into a string which contains the hex representing the args.
-    hex_encoded_args_string = sgutils.ensure_str(encoded_args)
+    hex_encoded_args_string = encoded_args.decode("utf-8")
 
     # If no path to RV was provided, us the PTR site rvlink protocol to launch RV
     if not path_to_rv:
