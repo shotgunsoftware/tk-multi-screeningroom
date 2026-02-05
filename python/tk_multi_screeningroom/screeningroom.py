@@ -354,7 +354,7 @@ def main():
         "web browser using the rvlink protocol.",
     )
 
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
 
     if not options.mode:
         print('INFO: No mode provided. Defaulting to "timeline" mode')
