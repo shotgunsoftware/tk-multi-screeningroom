@@ -55,3 +55,4 @@ description: "Screening Room integration right inside your application."
 requires_shotgun_version:
 requires_core_version: "v0.19.1"
 requires_engine_version:
+minimum_python_version: "3.9"
